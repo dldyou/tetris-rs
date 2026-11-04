@@ -173,6 +173,26 @@ fn try_move(board: &Board, piece: &Piece, dx: i32, dy: i32) -> Piece {
     *piece
 }
 
+fn place_piece(board: &mut Board, piece: &Piece) {
+    assert!(can_place(board, piece));
+
+    let mut next_board = board.clone();
+    let shape = piece.kind.shape(piece.rotation);
+
+    for (dy, row) in shape.iter().enumerate() {
+        for (dx, &cell) in row.iter().enumerate() {
+            if cell == 0 {
+                continue;
+            }
+
+            let x = piece.position.x + dx as i32;
+            let y = piece.position.y + dy as i32;
+
+            next_board.cells[y as usize][x as usize] = Some(piece.kind);
+        }
+    }
+}
+
 // fn reset(seed: u64) -> GameState {}
 // fn step(state: &GameState, action: Action) -> (GameState, StepResult) {}
 
@@ -190,7 +210,7 @@ mod tests {
     }
 
     #[cfg(test)]
-    mod peices {
+    mod pieces {
         use super::*;
 
         #[test]
