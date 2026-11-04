@@ -176,7 +176,6 @@ fn try_move(board: &Board, piece: &Piece, dx: i32, dy: i32) -> Piece {
 fn place_piece(board: &mut Board, piece: &Piece) {
     assert!(can_place(board, piece));
 
-    let mut next_board = board.clone();
     let shape = piece.kind.shape(piece.rotation);
 
     for (dy, row) in shape.iter().enumerate() {
@@ -188,9 +187,28 @@ fn place_piece(board: &mut Board, piece: &Piece) {
             let x = piece.position.x + dx as i32;
             let y = piece.position.y + dy as i32;
 
-            next_board.cells[y as usize][x as usize] = Some(piece.kind);
+            board.cells[y as usize][x as usize] = Some(piece.kind);
         }
     }
+}
+
+fn clear_lines(board: &mut Board) -> u32 {
+    let mut lines = 0;
+    let mut current_row = BOARD_HEIGHT;
+
+    for row in (0..BOARD_HEIGHT).rev() {
+        if board.cells[row].iter().all(Option::is_some) {
+            lines += 1;
+            continue;
+        }
+
+        current_row -= 1;
+        board.cells[current_row] = board.cells[row];
+    }
+
+    board.cells[..current_row].fill([None; BOARD_WIDTH]);
+
+    lines
 }
 
 // fn reset(seed: u64) -> GameState {}
@@ -205,8 +223,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_works() {
-        assert_eq!(1 + 2, 3);
+    fn clear_lines_at_full_board() {
+        let mut board = Board {
+            cells: [[Some(PieceKind::I); BOARD_WIDTH]; BOARD_HEIGHT],
+        };
+
+        assert_eq!(clear_lines(&mut board), BOARD_HEIGHT as u32);
+        assert_eq!(board, Board::new());
     }
 
     #[cfg(test)]
