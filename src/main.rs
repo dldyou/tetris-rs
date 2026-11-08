@@ -161,16 +161,17 @@ fn can_place(board: &Board, piece: &Piece) -> bool {
     true
 }
 
-fn try_move(board: &Board, piece: &Piece, dx: i32, dy: i32) -> Piece {
-    let mut candidate = *piece;
-    candidate.position.x += dx;
-    candidate.position.y += dy;
+fn try_move(board: &Board, piece: &mut Piece, dx: i32, dy: i32) -> bool {
+    piece.position.x += dx;
+    piece.position.y += dy;
 
-    if can_place(board, &candidate) {
-        return candidate;
+    if !can_place(board, &piece) {
+        piece.position.x -= dx;
+        piece.position.y -= dy;
+        return false;
     }
 
-    *piece
+    true
 }
 
 fn place_piece(board: &mut Board, piece: &Piece) {
@@ -246,15 +247,15 @@ mod tests {
 
             let board = Board::new();
 
-            assert_eq!(try_move(&board, &piece, -1, 0), piece);
+            assert_eq!(try_move(&board, &mut piece, -1, 0), false);
 
             piece.position.y = 20;
 
-            assert_eq!(try_move(&board, &piece, 0, 1), piece);
+            assert_eq!(try_move(&board, &mut piece, 0, 1), false);
 
             piece.position.x = 10;
 
-            assert_eq!(try_move(&board, &piece, 1, 0), piece);
+            assert_eq!(try_move(&board, &mut piece, 1, 0), false);
         }
     }
 }
