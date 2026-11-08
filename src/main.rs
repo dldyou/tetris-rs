@@ -165,9 +165,21 @@ fn try_move(board: &Board, piece: &mut Piece, dx: i32, dy: i32) -> bool {
     piece.position.x += dx;
     piece.position.y += dy;
 
-    if !can_place(board, &piece) {
+    if !can_place(board, piece) {
         piece.position.x -= dx;
         piece.position.y -= dy;
+        return false;
+    }
+
+    true
+}
+
+fn try_rotate(board: &mut Board, piece: &mut Piece) -> bool {
+    let original_rotation = piece.rotation;
+    piece.rotation = (piece.rotation + 1) % 4;
+
+    if !can_place(board, piece) {
+        piece.rotation = original_rotation;
         return false;
     }
 
@@ -247,15 +259,21 @@ mod tests {
 
             let board = Board::new();
 
+            let original_piece = piece;
             assert_eq!(try_move(&board, &mut piece, -1, 0), false);
+            assert_eq!(piece, original_piece);
 
-            piece.position.y = 20;
+            piece.position.y = 18;
 
+            let original_piece = piece;
             assert_eq!(try_move(&board, &mut piece, 0, 1), false);
+            assert_eq!(piece, original_piece);
 
             piece.position.x = 10;
 
+            let original_piece = piece;
             assert_eq!(try_move(&board, &mut piece, 1, 0), false);
+            assert_eq!(piece, original_piece);
         }
     }
 }
