@@ -1,3 +1,6 @@
+use rand::rngs::StdRng;
+use rand::{Rng, SeedableRng};
+
 type Shape = [[u8; 4]; 4];
 
 const SHAPES: [[Shape; 4]; 7] = [
@@ -224,12 +227,18 @@ fn clear_lines(board: &mut Board) -> u32 {
     lines
 }
 
+fn next_rand(state: &mut u64) {
+    let z = state;
+    *z = z.wrapping_add(0x9e3779b97f4a7c15);
+    *z = (*z ^ (*z >> 30)).wrapping_mul(0xbf58476d1ce4e5b9);
+    *z = (*z ^ (*z >> 27)).wrapping_mul(0x94d049bb133111eb);
+    *z = *z ^ (*z >> 31);
+}
+
 // fn reset(seed: u64) -> GameState {}
 // fn step(state: &GameState, action: Action) -> (GameState, StepResult) {}
 
-fn main() {
-    println!("Hello, world!");
-}
+fn main() {}
 
 #[cfg(test)]
 mod tests {
