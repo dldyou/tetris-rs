@@ -1,6 +1,3 @@
-use rand::rngs::StdRng;
-use rand::{Rng, SeedableRng};
-
 type Shape = [[u8; 4]; 4];
 
 const SHAPES: [[Shape; 4]; 7] = [
@@ -233,6 +230,18 @@ fn next_rand(state: &mut u64) {
     *z = (*z ^ (*z >> 30)).wrapping_mul(0xbf58476d1ce4e5b9);
     *z = (*z ^ (*z >> 27)).wrapping_mul(0x94d049bb133111eb);
     *z = *z ^ (*z >> 31);
+}
+
+fn shuffle<T>(slice: &mut [T], rnd: &mut u64) {
+    let len = slice.len();
+    if len <= 1 {
+        return;
+    }
+
+    for i in (1..len).rev() {
+        slice.swap(i, rnd.wrapping_rem(len as u64) as usize);
+        next_rand(rnd);
+    }
 }
 
 // fn reset(seed: u64) -> GameState {}
