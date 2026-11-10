@@ -244,6 +244,20 @@ fn shuffle<T>(slice: &mut [T], rnd: &mut u64) {
     }
 }
 
+fn reset_bag(game_state: &mut GameState) {
+    game_state.bag = [
+        PieceKind::I,
+        PieceKind::O,
+        PieceKind::T,
+        PieceKind::S,
+        PieceKind::Z,
+        PieceKind::J,
+        PieceKind::L,
+    ];
+
+    shuffle(&mut game_state.bag, &mut game_state.seed);
+}
+
 // fn reset(seed: u64) -> GameState {}
 // fn step(state: &GameState, action: Action) -> (GameState, StepResult) {}
 
