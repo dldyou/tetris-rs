@@ -239,7 +239,7 @@ fn shuffle<T>(slice: &mut [T], rnd: &mut u64) {
     }
 
     for i in (1..len).rev() {
-        slice.swap(i, rnd.wrapping_rem(len as u64) as usize);
+        slice.swap(i, (*rnd % (i as u64 + 1)) as usize);
         next_rand(rnd);
     }
 }
