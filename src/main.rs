@@ -258,6 +258,18 @@ fn reset_bag(game_state: &mut GameState) {
     shuffle(&mut game_state.bag, &mut game_state.seed);
 }
 
+fn reset_game(game_state: &mut GameState, seed: u64) {
+    game_state.board = Board::new();
+    game_state.active = None;
+    game_state.seed = seed;
+
+    reset_bag(game_state);
+    game_state.bag_index = 0;
+
+    game_state.ticks = 0;
+    game_state.game_over = false;
+}
+
 // fn reset(seed: u64) -> GameState {}
 // fn step(state: &GameState, action: Action) -> (GameState, StepResult) {}
 
