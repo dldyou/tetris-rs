@@ -111,6 +111,28 @@ struct GameState {
     game_over: bool,
 }
 
+impl GameState {
+    fn new() -> Self {
+        Self {
+            board: Board::new(),
+            active: None,
+            seed: 0,
+            bag: [
+                PieceKind::I,
+                PieceKind::O,
+                PieceKind::T,
+                PieceKind::S,
+                PieceKind::Z,
+                PieceKind::J,
+                PieceKind::L,
+            ],
+            bag_index: 0,
+            ticks: 0,
+            game_over: false,
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Action {
     Noop,
@@ -270,6 +292,31 @@ fn reset_game(game_state: &mut GameState, seed: u64) {
     game_state.game_over = false;
 }
 
+fn next_piece(game_state: &mut GameState) {
+    let next_kind = game_state.bag[game_state.bag_index];
+    let next = Piece {
+        kind: next_kind,
+        position: Position {
+            x: (BOARD_WIDTH as i32 - SHAPES[0][0].len() as i32) / 2,
+            y: 0,
+        },
+        rotation: 0,
+    };
+
+    game_state.bag_index = if game_state.bag_index == game_state.bag.len() - 1 {
+        reset_bag(game_state);
+        0
+    } else {
+        game_state.bag_index + 1
+    };
+
+    if can_place(&game_state.board, &next) {
+        game_state.active = Some(next);
+    } else {
+        game_state.game_over = true;
+    }
+}
+
 // fn reset(seed: u64) -> GameState {}
 // fn step(state: &GameState, action: Action) -> (GameState, StepResult) {}
 
@@ -289,35 +336,30 @@ mod tests {
         assert_eq!(board, Board::new());
     }
 
-    #[cfg(test)]
-    mod pieces {
-        use super::*;
+    #[test]
+    fn cannot_moved_by_wall() {
+        let mut piece = Piece {
+            kind: PieceKind::O,
+            position: Position { x: -1, y: 10 },
+            rotation: 0,
+        };
 
-        #[test]
-        fn cannot_moved_by_wall() {
-            let mut piece = Piece {
-                kind: PieceKind::O,
-                position: Position { x: -1, y: 10 },
-                rotation: 0,
-            };
+        let board = Board::new();
 
-            let board = Board::new();
+        let original_piece = piece;
+        assert_eq!(try_move(&board, &mut piece, -1, 0), false);
+        assert_eq!(piece, original_piece);
 
-            let original_piece = piece;
-            assert_eq!(try_move(&board, &mut piece, -1, 0), false);
-            assert_eq!(piece, original_piece);
+        piece.position.y = 18;
 
-            piece.position.y = 18;
+        let original_piece = piece;
+        assert_eq!(try_move(&board, &mut piece, 0, 1), false);
+        assert_eq!(piece, original_piece);
 
-            let original_piece = piece;
-            assert_eq!(try_move(&board, &mut piece, 0, 1), false);
-            assert_eq!(piece, original_piece);
+        piece.position.x = 10;
 
-            piece.position.x = 10;
-
-            let original_piece = piece;
-            assert_eq!(try_move(&board, &mut piece, 1, 0), false);
-            assert_eq!(piece, original_piece);
-        }
+        let original_piece = piece;
+        assert_eq!(try_move(&board, &mut piece, 1, 0), false);
+        assert_eq!(piece, original_piece);
     }
 }
