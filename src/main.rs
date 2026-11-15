@@ -54,6 +54,7 @@ const SHAPES: [[Shape; 4]; 7] = [
 
 const BOARD_WIDTH: usize = 10;
 const BOARD_HEIGHT: usize = 20;
+const PIECE_WIDTH: usize = 4;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum PieceKind {
@@ -112,11 +113,11 @@ struct GameState {
 }
 
 impl GameState {
-    fn new() -> Self {
+    fn new(seed: u64) -> Self {
         Self {
             board: Board::new(),
             active: None,
-            seed: 0,
+            seed: seed,
             bag: [
                 PieceKind::I,
                 PieceKind::O,
@@ -281,15 +282,9 @@ fn reset_bag(game_state: &mut GameState) {
 }
 
 fn reset_game(game_state: &mut GameState, seed: u64) {
-    game_state.board = Board::new();
-    game_state.active = None;
-    game_state.seed = seed;
-
+    *game_state = GameState::new(seed);
     reset_bag(game_state);
-    game_state.bag_index = 0;
-
-    game_state.ticks = 0;
-    game_state.game_over = false;
+    next_piece(game_state);
 }
 
 fn next_piece(game_state: &mut GameState) {
@@ -297,7 +292,7 @@ fn next_piece(game_state: &mut GameState) {
     let next = Piece {
         kind: next_kind,
         position: Position {
-            x: (BOARD_WIDTH as i32 - SHAPES[0][0].len() as i32) / 2,
+            x: (BOARD_WIDTH as i32 - PIECE_WIDTH as i32) / 2,
             y: 0,
         },
         rotation: 0,
@@ -313,6 +308,7 @@ fn next_piece(game_state: &mut GameState) {
     if can_place(&game_state.board, &next) {
         game_state.active = Some(next);
     } else {
+        game_state.active = None;
         game_state.game_over = true;
     }
 }
