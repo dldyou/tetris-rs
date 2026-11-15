@@ -1,3 +1,10 @@
+use crossterm::{
+    event::{self, Event, KeyCode, KeyEventKind},
+    terminal::{disable_raw_mode, enable_raw_mode},
+};
+
+use std::{io, time::Duration};
+
 type Shape = [[u8; 4]; 4];
 
 const SHAPES: [[Shape; 4]; 7] = [
@@ -316,7 +323,29 @@ fn next_piece(game_state: &mut GameState) {
 // fn reset(seed: u64) -> GameState {}
 // fn step(state: &GameState, action: Action) -> (GameState, StepResult) {}
 
-fn main() {}
+fn read_action() -> io::Result<Option<Action>> {
+    if !event::poll(Duration::from_millis(33))? {
+        return Ok(None);
+    }
+
+    match event::read()? {
+        Event::Key(key) if key.kind == KeyEventKind::Press => Ok(match key.code {
+            KeyCode::Left => Some(Action::Left),
+            KeyCode::Right => Some(Action::Right),
+            KeyCode::Down => Some(Action::SoftDrop),
+            KeyCode::Up => Some(Action::RotateClockwise),
+            KeyCode::Char(' ') => Some(Action::HardDrop),
+            _ => None,
+        }),
+        _ => Ok(None),
+    }
+}
+
+fn main() -> io::Result<()> {
+    enable_raw_mode()?;
+
+    disable_raw_mode()
+}
 
 #[cfg(test)]
 mod tests {
