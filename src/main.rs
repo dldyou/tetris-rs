@@ -358,4 +358,27 @@ mod tests {
         assert_eq!(try_move(&board, &mut piece, 1, 0), false);
         assert_eq!(piece, original_piece);
     }
+
+    #[test]
+    fn bag_has_all_pieces() {
+        let mut game_state = GameState::new(42);
+
+        reset_bag(&mut game_state);
+
+        let all_kinds_of_pieces = [
+            PieceKind::I,
+            PieceKind::O,
+            PieceKind::T,
+            PieceKind::S,
+            PieceKind::Z,
+            PieceKind::J,
+            PieceKind::L,
+        ];
+
+        assert!(
+            all_kinds_of_pieces
+                .iter()
+                .all(|piece| game_state.bag.contains(piece))
+        );
+    }
 }
